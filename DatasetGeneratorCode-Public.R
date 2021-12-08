@@ -2,7 +2,6 @@
 library(twitteR)
 library(dplyr)
 library(rtweet)
-library(ggplot2)
 library(tidytext)
 library(rvest)
 library(jsonlite)
@@ -25,117 +24,63 @@ twitter_token <- create_token(
 
 ##Harvesting Hashtag Data##
 
-dontexecute_fa <-search_tweets("#اعدام_نکنید",n=18000,include_rts = FALSE)
-stopexeciran<-search_tweets("#StopExecutionsInIran",n=18000,include_rts = FALSE)
-savenafid<-search_tweets("#savenafidafkari",n=18000,include_rts = FALSE)
-stopexecnow<-search_tweets("#لغو ـ فوری ـ اعدام",n=18000,include_rts = FALSE)
-freenasrin <-search_tweets("#freenasrin",n=18000,include_rts = FALSE)
-freeloujain<-search_tweets("#freeloujain",n=18000,include_rts = FALSE)
-savealaa<-search_tweets("#savealaa",n=18000,include_rts = FALSE)
-freealaa_a<-search_tweets("#freealaa",n=18000,include_rts = FALSE)
-freenarges<-search_tweets("#freenarges",n=18000,include_rts = FALSE)
-freesanaa<-search_tweets("#freesanaa",n=18000,include_rts = FALSE)
+
+freeloujain<-search_fullarchive("#freeloujain",n=1000,fromDate = 201801010000,toDate = 202110070000,env_name = "FullArchive",safedir = NULL,parse = TRUE, token = twitter_token)
+freenarges<-search_fullarchive("#freenarges",n=1000,fromDate = 201801010000,toDate = 202110070000,env_name = "FullArchive",safedir = NULL,parse = TRUE, token = twitter_token) 
+freenasrin<-search_fullarchive("#freenasrin",n=1000,fromDate = 202006010000,toDate = 202110070000,env_name = "FullArchive",safedir = NULL,parse = TRUE, token = twitter_token)   
+freesanaa<-search_fullarchive("#freesanaa",n=1000,fromDate = 202006010000,toDate = 202110070000,env_name = "FullArchive",safedir = NULL,parse = TRUE, token = twitter_token)   
+
 
 #Activist Outcomes and Appending Related Hashtags#
 
-##Don't Execute##
 
-dontexecute<-bind_rows(dontexecute_fa,stopexeciran,stopexecnow,savenafid)
-
-dontexecute<-dontexecute%>%
-  mutate(
-    status = "Veredict Halted",
-    Sentence = "Death",
-    arrestlengthyrs ="NA",
-    timeservedyrs="NA",
-    charges1= "Violence Against State",
-    charges2="Murder",
-    charges3="NA",
-    activismtype= "Civil & Political Rights",
-    country= "Iran"
-  )
-
-##Nasrin Sotoudeh## 
+##Case 1: Nasrin Sotoudeh## 
 
 freenasrin<-freenasrin%>%
   mutate(
-    status = "Sentenced",
-    Sentence = "Imprisonment",
-    arrestlengthyrs ="33",
-    timeservedyrs="3",
-    charges1= "Undisclosed",
-    charges2="NA",
-    charges3="NA",
-    activismtype= "Women's Rights",
-    country= "Iran"
+    casecountry = "Iran",
+    casename = "freenasrin",
+    outcome ="unfavorable"
   )
 
-##Loujain Al-Hathloul##
+##Case 2: Loujain Al-Hathloul##
 
 freeloujain<-freeloujain%>%
   mutate(
-    status = "Conditional Release",
-    Sentence = "Imprisonment",
-    arrestlengthyrs ="5.67",
-    timeservedyrs="2.74",
-    charges1= "Terrorism",
-    charges2="NA",
-    charges3="NA",
-    activismtype= "Women's Rights",
-    country= "Saudi Arabia"
+    casecountry = "Saudi Arabia",
+    casename = "freeloujain",
+    outcome ="favorable"
   )
 
-##Alaa Abd El-Fattah##
+##Case 3: Narges Mohammadi##
 
-freealaa<-bind_rows(freealaa_a,savealaa)
-
-freealaa<-freealaa%>%
-  mutate(
-    status = "In Custody",
-    Sentence = "Awaiting Veredict",
-    arrestlengthyrs ="NA",
-    timeservedyrs="NA",
-    charges1= "Assembly",
-    charges2="NA",
-    charges3="NA",
-    activismtype= "Civil & Political Rights",
-    country= "Egypt"
-  )
-
-##Narges Mohammadi##
+freenarges<-bind_rows(freenarges_a,fa_freenarges)
 
 freenarges<-freenarges%>%
   mutate(
-    status = "Released",
-    Sentence = "Imprisonment",
-    arrestlengthyrs ="16",
-    timeservedyrs="4",
-    charges1= "Assembly",
-    charges2="Anti-Government Propaganda",
-    charges3="Collusion",
-    activismtype= "Human Rights",
-    country= "Iran"
+    casecountry = "Iran",
+    casename = "freenarges",
+    outcome ="favorable"
   )
 
-##Sanaa Seif## 
+##Case 4: Sanaa Seif## 
 
 freesanaa<-freesanaa%>%
   mutate(
-    status = "Sentenced",
-    Sentence = "Imprisonment",
-    arrestlengthyrs ="1.5",
-    timeservedyrs=".5",
-    charges1= "Misuse of Social Media",
-    charges2="Spreading False Rumors",
-    charges3="NA",
-    activismtype= "Civil & Political Rights",
-    country= "Egypt"
+    casecountry = "Egypt",
+    casename = "freeSanaa",
+    outcome ="unfavorable"
   )
 
 #Final DataSet#
 
-ActivistTweets<-bind_rows(freesanaa,freenarges,freealaa,freeloujain,freenasrin,dontexecute)
+ActivistTweets<-bind_rows(freesanaa,freenarges,freeloujain,freenasrin)
 
 ActivistTweets = data.frame(lapply(ActivistTweets, as.character), stringsAsFactors=FALSE)
 
-write.csv(ActivistTweets,"ActivistTweets20211005.csv")
+
+write.csv(ActivistTweets,"ActivistTweetsDec2021.csv")
+
+ActivistTweets<-read.csv("ActivistTweetsDec2021.csv")
+
+
